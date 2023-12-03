@@ -7,7 +7,8 @@
 #define debuglnDec(x,d) Serial.println(x,d)
 #define debugDelay(x) delay(x)
 #define debugRead() Serial.read()
-#degine debugAvailable() Serial.available()
+#define debugAvailable() Serial.available()
+#define debugMessages() verboseMessages()
 #else
 #define debug(x)
 #define debugDec(x,d)
@@ -16,4 +17,5 @@
 #define debugDelay(x)
 #define debugRead() 's'
 #define debugAvailable() 1
+#define debugMessages()
 #endif

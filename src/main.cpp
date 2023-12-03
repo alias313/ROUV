@@ -1,29 +1,10 @@
 #include <Arduino.h>
 #include "pins.hpp"
+#include "main.hpp"
 #include "debug.hpp"
 
-#define VREF 5.0      // analog reference voltage(Volt) of the ADC
-#define SCOUNT  30           // sum of sample point
-
-unsigned int sampleRate = 20U;
-unsigned int window = 25; // Number of samples taken
-
-// MPX (Pressure meter)
-
-float mpxVoltage = 0.0;
-
-// TDS (TDS meter)
-int analogBuffer[SCOUNT];    // store the analog value in the array, read from ADC
-int analogBufferTemp[SCOUNT];
-int analogBufferIndex = 0, copyIndex = 0;
-int tdsValue = 0;
-float tdsAverageVoltage = 0, temperature = 25;
-
-// TSW (Turbidity meter)
-float tswVoltage = 0.0;
-int ntuValue = 0;
-
 int getMedianNum(int bArray[], int iFilterLen);
+void verboseMessages();
 
 void setup()
 {
@@ -40,15 +21,15 @@ void setup()
     debugln("Conversion a medidas utiles: tension => profundidad, turbidez, total de solidos disueltos");
     debugln("=========================================================================================");
     debugln(" ");
-    debugln("MPX: Tension\tTDS: Tension\t TDS \tTSW: Tension\t NTU ");
-    debugln("------------\t------------\t-----\t------------\t-----");
+    debugln("MPX: Tension\tTDS: Tension / TDS   \tTSW: Tension / NTU   ");
+    debugln("------------\t---------------------\t---------------------");
 }
 
 void loop()
 {
     static unsigned long analogSampleTimepoint = millis();
     if (millis() - analogSampleTimepoint > sampleRate) // every 20 milliseconds, read the analog value from the ADC
-    {
+    {   
         // TDS sensor
         analogSampleTimepoint = millis();
         analogBuffer[analogBufferIndex] = analogRead(TDSPin); // read the analog value and store into the buffer
@@ -56,22 +37,38 @@ void loop()
         if (analogBufferIndex == SCOUNT)
             analogBufferIndex = 0;
 
+        // LM35 temperature sensor
+        lmVoltage += ((float)analogRead(LMPin) / 1024) * 5000; // mV because every 10 mV is 1 degree Celsius
+
+        // MPX pressure ==> depth sensor
+        mpxVoltage += ((float)analogRead(MPXPin) / 1024) * 5;       
+
         // Turbitity sensor
         tswVoltage += ((float)analogRead(TSWPin) / 1024) * 5; //mapping from 10-bit voltage reading to 0-5V range
     }
     static unsigned long printTimepoint = millis();
     if (millis() - printTimepoint > window*sampleRate)
     {
+        // Simple averaging for depth and temperature values
+        mpxVoltage /= window;
+        lmVoltage /= window;
+
+        depth = mpxVoltage * depthCoefficient - depthOffset;
+        tempValue = lmVoltage / 10;
+
+        mpxVoltage = 0.0;
+        lmVoltage = 0.0;
+
         // Apply median filtering algorithm to data read from TDSPin
         printTimepoint = millis();
         for (copyIndex = 0; copyIndex < SCOUNT; copyIndex++)
             analogBufferTemp[copyIndex] = analogBuffer[copyIndex];
         tdsAverageVoltage = getMedianNum(analogBufferTemp, SCOUNT) * (float)VREF / 1024.0; 
-        float compensationCoefficient = 1.0 + 0.02 * (temperature - 25.0);                                                                                                               // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
-        float compensationVolatge = tdsAverageVoltage / compensationCoefficient;                                                                                                            // temperature compensation
-        tdsValue = (133.42 * compensationVolatge * compensationVolatge * compensationVolatge - 255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge) * 0.5; // convert voltage value to tds value
+        float compensationCoefficient = 1.0 + 0.02 * (tempValue - 25.0);                                                                                                               // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
+        float compensationVoltage = tdsAverageVoltage / compensationCoefficient;                                                                                                            // temperature compensation
+        tdsValue = (133.42 * compensationVoltage * compensationVoltage * compensationVoltage - 255.86 * compensationVoltage * compensationVoltage + 857.39 * compensationVoltage) * 0.5; // convert voltage value to tds value
 
-        // Simple averaging to data read from TSWPin
+        // https://fgcoca.github.io/Sensores-actuadores-y-shield-tipo-Arduino/turbidez/
         tswVoltage /= window;
         if (tswVoltage < 2.5)
         {
@@ -82,31 +79,23 @@ void loop()
         tswVoltage = 0.0;
 
         // Serial debugging
-        debug("MPX: ");
-        debugDec(mpxVoltage, 2);
-        debug("V\t");
-        debug("TDS: ");
-        debugDec(tdsAverageVoltage,2);
-        debug("V\t");
-        debug(tdsValue);
-        debug("ppm\t");
-        debug("TSW: ");
-        debug(analogRead(TSWPin));
-        debug("V\t");
-        debugln(ntuValue);
+        debugMessages();
 
         // Serial communication (frame sent to master)
-        Serial.print(mpxVoltage);
-        Serial.print(" ");
-        Serial.print(tdsValue);
-        Serial.print(" ");
-        Serial.print(ntuValue);
-        Serial.print(" ");
-        Serial.print("+234rpm");
-        Serial.print(" ");
-        Serial.print("-1034rpm");
-        Serial.print(" ");
-        Serial.println("+0rpm");
+        debug("\tData in array: ");
+        Serial.print(tempValue);       // 4 bytes
+        Serial.print(" ");          // 1 byte
+        Serial.print(depth);        // 4 bytes
+        Serial.print(" ");          // 1 byte
+        Serial.print(tdsValue);     // 2 bytes
+        Serial.print(" ");          // 1 byte
+        Serial.print(ntuValue);     // 2 bytes
+        Serial.print(" ");          // 1 byte
+        Serial.print("+234rpm");    // 2 bytes
+        Serial.print(" ");          // 1 byte
+        Serial.print("-1034rpm");   // 2 bytes
+        Serial.print(" ");          // 1 byte
+        Serial.println("+0rpm");    // 2 bytes
     }
 }
 
@@ -133,4 +122,30 @@ int getMedianNum(int bArray[], int iFilterLen)
     else
         bTemp = (bTab[iFilterLen / 2] + bTab[iFilterLen / 2 - 1]) / 2;
     return bTemp;
+}
+
+void verboseMessages() {
+        debug("MPX: ");
+        debugDec(mpxVoltage, 2);        // 4 Bytes
+        debug("V ");
+        // debug(sizeof(mpxVoltage));
+        // debug("Bytes");
+        debug("\tTDS: ");
+        debugDec(tdsAverageVoltage,2);  // 4 Bytes
+        debug("V / ");
+        // debug(sizeof(tdsAverageVoltage));
+        // debug("Bytes / ");
+        debug(tdsValue);
+        debug(" ppm ");
+        // debug(sizeof(tdsValue));        // 2 Bytes
+        // debug("Bytes");
+        debug("\tTSW: ");
+        debug((float)analogRead(TSWPin) / 1024 * 5);      // 2 Bytes
+        debug("V / ");
+        // debug(sizeof((float)analogRead(TSWPin) / 1024 * 5));
+        // debug("Bytes / ");
+        debug(ntuValue);                // 2 Bytes
+        debug(" NTU ");
+        // debug(sizeof(ntuValue));
+        // debugln("Bytes");
 }
