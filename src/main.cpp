@@ -83,7 +83,7 @@ void loop()
 
         // Serial communication (frame sent to master)
         debug("\tData in array: ");
-        Serial.print(tempValue);       // 4 bytes
+        Serial.print(tempValue);    // 4 bytes
         Serial.print(" ");          // 1 byte
         Serial.print(depth);        // 4 bytes
         Serial.print(" ");          // 1 byte
