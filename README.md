@@ -1,5 +1,5 @@
 # ROUV
-Firmware for Remotely Operated Underwater Vehicle university project
+Firmware for Remotely Operated Underwater Vehicle university project 
 TODO:
 - Captain mode (Electronically drive ROUV with drivers), activate with 'c' input
     - Motor commands (On, duty_cycle, off)

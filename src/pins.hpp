@@ -3,9 +3,14 @@
 #define TSWPin A2   // TSW-20M Turbidity (Nephelometer in NTU) sensor
 #define LMPin  A3   // LM35 temperature sensor 
 
-#define DIR1 2
-#define PWM1 3
-#define DIR2 8
-#define PWM2 5
-#define DIR3 7
-#define PWM3 6
+/* Left motor */
+#define DIRL 2
+#define PWML 3
+
+/* Cemter motor */
+#define DIRC 8
+#define PWMC 5
+
+/* Right motor */
+#define DIRR 7
+#define PWMR 6

@@ -1,6 +1,13 @@
 #define VREF 5.0      // analog reference voltage(Volt) of the ADC
 #define SCOUNT  30           // sum of sample point
 
+#define CLOCKWISE_LETTER 'k'
+#define ANTICLOKWISE_LETTER 'a'
+#define CLOCKWISE 1
+#define ANTICLOCKWISE 0
+
+char turn; // 'k' turns clockwise, 'a' turns anticlockwise
+
 unsigned int sampleRate = 20U;
 unsigned int window = 25;   // Number of samples taken
 

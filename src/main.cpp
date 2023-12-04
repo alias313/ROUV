@@ -3,6 +3,7 @@
 #include "main.hpp"
 #include "debug.hpp"
 
+void turningDirection(char inputLetter, char motor);
 int getMedianNum(int bArray[], int iFilterLen);
 void verboseMessages();
 
@@ -26,7 +27,79 @@ void setup()
 }
 
 void loop()
-{
+{   
+    if (Serial.read() == 'c') // c for captain mode
+    {
+        switch (Serial.read())
+        {
+        case 'q':
+            turn = Serial.read();
+            turningDirection(turn, 'l');
+            analogWrite(PWML, 25);
+            break;
+        case 'w':
+            turn = Serial.read();
+            turningDirection(turn, 'l');
+            analogWrite(PWML, 50);
+            break;
+        case 'e':
+            turn = Serial.read();
+            turningDirection(turn, 'l');
+            analogWrite(PWML, 75);
+            break;
+        case 'r':
+            turn = Serial.read();
+            turningDirection(turn, 'l');
+            analogWrite(PWML, 100);
+            break;
+
+        case 'f':
+            turn = Serial.read();
+            turningDirection(turn, 'c');
+            analogWrite(PWMC, 25);
+            break;
+        case 't':
+            turn = Serial.read();
+            turningDirection(turn, 'c');
+            analogWrite(PWMC, 50);
+            break;
+        case 'y':
+            turn = Serial.read();
+            turningDirection(turn, 'c');
+            analogWrite(PWMC, 75);
+            break;
+        case 'h':
+            turn = Serial.read();
+            turningDirection(turn, 'c');
+            analogWrite(PWMC, 100);
+            break;
+
+
+        case 'u':
+            turn = Serial.read();
+            turningDirection(turn, 'r');
+            analogWrite(PWMR, 25);
+            break;
+        case 'i':
+            turn = Serial.read();
+            turningDirection(turn, 'r');
+            analogWrite(PWMR, 50);
+            break;
+        case 'o':
+            turn = Serial.read();
+            turningDirection(turn, 'r');
+            analogWrite(PWMR, 75);
+            break;
+        case 'p':
+            turn = Serial.read();
+            turningDirection(turn, 'r');
+            analogWrite(PWMR, 100);
+            break;
+
+        default:
+            break;
+        }
+    }
     static unsigned long analogSampleTimepoint = millis();
     if (millis() - analogSampleTimepoint > sampleRate) // every 20 milliseconds, read the analog value from the ADC
     {   
@@ -96,6 +169,26 @@ void loop()
         Serial.print("-1034rpm");   // 2 bytes
         Serial.print(" ");          // 1 byte
         Serial.println("+0rpm");    // 2 bytes
+    }
+}
+
+void turningDirection(char inputLetter, char motor)
+{
+    switch (motor)
+    {
+    case 'l':
+        if (inputLetter == CLOCKWISE_LETTER) digitalWrite(DIRL, CLOCKWISE);
+        else if (inputLetter == ANTICLOCKWISE_LETTER) digitalWrite(DIRL, ANTICLOCKWISE);
+        break;
+    case 'c':
+        if (inputLetter == CLOCKWISE_LETTER) digitalWrite(DIRC, CLOCKWISE);
+        else if (inputLetter == ANTICLOCKWISE_LETTER) digitalWrite(DIRC, ANTICLOCKWISE);
+        break;
+    case 'r':
+        if (inputLetter == CLOCKWISE_LETTER) digitalWrite(DIRR, CLOCKWISE);
+        else if (inputLetter ==  ANTICLOKWISE_LETTER) digitalWrite(DIRR, ANTICLOCKWISE);
+    default:
+        break;
     }
 }
 
