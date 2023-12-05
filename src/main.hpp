@@ -1,12 +1,19 @@
 #define VREF 5.0      // analog reference voltage(Volt) of the ADC
 #define SCOUNT  30           // sum of sample point
 
+#define STOP 0
+#define LOW_SPEED 64   // ceiling(25% of 255)
+#define HALF_SPEED 128 // ceiling(50% of 255)
+#define HIGH_SPEED 196 // ceiling(75% of 255)
+#define FULL_SPEED 250 // ceiling(98% of 255)
+
 #define CLOCKWISE_LETTER 'k'
-#define ANTICLOKWISE_LETTER 'a'
+#define ANTICLOCKWISE_LETTER 'a'
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 0
 
-char turn; // 'k' turns clockwise, 'a' turns anticlockwise
+char command;   // command to chose the motor & speed
+char turn;      // 'k' turns clockwise, 'a' turns anticlockwise
 
 unsigned int sampleRate = 20U;
 unsigned int window = 25;   // Number of samples taken

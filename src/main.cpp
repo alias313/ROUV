@@ -3,7 +3,7 @@
 #include "main.hpp"
 #include "debug.hpp"
 
-void turningDirection(char inputLetter, char motor);
+void turnMotor(char motor, char inputLetter, char dutyCycle);
 int getMedianNum(int bArray[], int iFilterLen);
 void verboseMessages();
 
@@ -30,73 +30,62 @@ void loop()
 {   
     if (Serial.read() == 'c') // c for captain mode
     {
-        switch (Serial.read())
+        command = Serial.read();
+        turn = Serial.read();
+        switch (command)
         {
+        case 'a':
+            turnMotor('l', turn, STOP);
+            break;
         case 'q':
-            turn = Serial.read();
-            turningDirection(turn, 'l');
-            analogWrite(PWML, 25);
+            turnMotor('l', turn, LOW_SPEED);
             break;
         case 'w':
-            turn = Serial.read();
-            turningDirection(turn, 'l');
-            analogWrite(PWML, 50);
+            turnMotor('l', turn, HALF_SPEED);
             break;
         case 'e':
-            turn = Serial.read();
-            turningDirection(turn, 'l');
-            analogWrite(PWML, 75);
+            turnMotor('l', turn, HIGH_SPEED);
             break;
         case 'r':
-            turn = Serial.read();
-            turningDirection(turn, 'l');
-            analogWrite(PWML, 100);
+            turnMotor('l', turn, FULL_SPEED);
             break;
 
+        case 's':
+            turnMotor('c', turn, STOP);
+            break;
         case 'f':
-            turn = Serial.read();
-            turningDirection(turn, 'c');
-            analogWrite(PWMC, 25);
+            turnMotor('c', turn, LOW_SPEED);
             break;
         case 't':
-            turn = Serial.read();
-            turningDirection(turn, 'c');
-            analogWrite(PWMC, 50);
+            turnMotor('c', turn, HALF_SPEED);
             break;
         case 'y':
-            turn = Serial.read();
-            turningDirection(turn, 'c');
-            analogWrite(PWMC, 75);
+            turnMotor('c', turn, HIGH_SPEED);
             break;
         case 'h':
-            turn = Serial.read();
-            turningDirection(turn, 'c');
-            analogWrite(PWMC, 100);
+            turnMotor('c', turn, FULL_SPEED);
             break;
 
-
+        case 'd':
+            turnMotor('r', turn, STOP);
+            break;
         case 'u':
-            turn = Serial.read();
-            turningDirection(turn, 'r');
-            analogWrite(PWMR, 25);
+            turnMotor('r', turn, LOW_SPEED);
             break;
         case 'i':
-            turn = Serial.read();
-            turningDirection(turn, 'r');
-            analogWrite(PWMR, 50);
+            turnMotor('r', turn, HALF_SPEED);
             break;
         case 'o':
-            turn = Serial.read();
-            turningDirection(turn, 'r');
-            analogWrite(PWMR, 75);
+            turnMotor('r', turn, HIGH_SPEED);
             break;
         case 'p':
-            turn = Serial.read();
-            turningDirection(turn, 'r');
-            analogWrite(PWMR, 100);
+            turnMotor('r', turn, FULL_SPEED);
             break;
 
         default:
+            debug("Command ");
+            debug(command);
+            debugln(" not recognized.");
             break;
         }
     }
@@ -172,21 +161,24 @@ void loop()
     }
 }
 
-void turningDirection(char inputLetter, char motor)
+void turnMotor(char motor, char inputLetter, int dutyCycle)
 {
     switch (motor)
     {
     case 'l':
         if (inputLetter == CLOCKWISE_LETTER) digitalWrite(DIRL, CLOCKWISE);
         else if (inputLetter == ANTICLOCKWISE_LETTER) digitalWrite(DIRL, ANTICLOCKWISE);
+        analogWrite(PWML, dutyCycle);
         break;
     case 'c':
         if (inputLetter == CLOCKWISE_LETTER) digitalWrite(DIRC, CLOCKWISE);
         else if (inputLetter == ANTICLOCKWISE_LETTER) digitalWrite(DIRC, ANTICLOCKWISE);
+        analogWrite(PWMC, dutyCycle);
         break;
     case 'r':
         if (inputLetter == CLOCKWISE_LETTER) digitalWrite(DIRR, CLOCKWISE);
-        else if (inputLetter ==  ANTICLOKWISE_LETTER) digitalWrite(DIRR, ANTICLOCKWISE);
+        else if (inputLetter ==  ANTICLOCKWISE_LETTER) digitalWrite(DIRR, ANTICLOCKWISE);
+        analogWrite(PWMR, dutyCycle);
     default:
         break;
     }
