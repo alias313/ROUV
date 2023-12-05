@@ -3,7 +3,7 @@
 #include "main.hpp"
 #include "debug.hpp"
 
-void turnMotor(char motor, char inputLetter, char dutyCycle);
+void turnMotor(char motor, char inputLetter, int dutyCycle);
 int getMedianNum(int bArray[], int iFilterLen);
 void verboseMessages();
 
