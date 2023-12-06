@@ -28,11 +28,28 @@ void setup()
 
 void loop()
 {   
-    if (Serial.read() == 'c') // c for captain mode
+    while (Serial.available() > 0)
     {
-        command = Serial.read();
-        turn = Serial.read();
-        switch (command)
+        char inputByte = Serial.read();
+        debugln(inputByte);
+        
+        if (inputByte != '\n')
+        {
+            command[command_pos] = inputByte;
+            command_pos++;
+        } else {
+            command_pos = 0;
+            debugln("\n");
+            break;
+        }
+
+    }
+
+    if (Serial.available() > 0)
+    {
+        commandKey = command[0];
+        turn = command[1];
+        switch (commandKey)
         {
         case 'a':
             turnMotor('l', turn, STOP);
@@ -81,10 +98,15 @@ void loop()
         case 'p':
             turnMotor('r', turn, FULL_SPEED);
             break;
-
+        case '\r':
+            debugln("\r");
+            break;
+        case '\n':
+            debugln("\n");
+            break;
         default:
-            debug("Command ");
-            debug(command);
+            debug("Command Key ");
+            debug(commandKey);
             debugln(" not recognized.");
             break;
         }
@@ -153,11 +175,11 @@ void loop()
         Serial.print(" ");          // 1 byte
         Serial.print(ntuValue);     // 2 bytes
         Serial.print(" ");          // 1 byte
-        Serial.print("+234rpm");    // 2 bytes
+        Serial.print("+234");    // 2 bytes
         Serial.print(" ");          // 1 byte
-        Serial.print("-1034rpm");   // 2 bytes
+        Serial.print("-1034");   // 2 bytes
         Serial.print(" ");          // 1 byte
-        Serial.println("+0rpm");    // 2 bytes
+        Serial.println("+0");    // 2 bytes
     }
 }
 
@@ -182,6 +204,10 @@ void turnMotor(char motor, char inputLetter, int dutyCycle)
     default:
         break;
     }
+    debug("Command ");
+    debug(motor);
+    debug(inputLetter);
+    debugln(dutyCycle);
 }
 
 int getMedianNum(int bArray[], int iFilterLen) 
