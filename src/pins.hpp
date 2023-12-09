@@ -8,9 +8,9 @@
 #define PWML 3
 
 /* Cemter motor */
-#define DIRC 8
-#define PWMC 5
+#define DIRC 12
+#define PWMC 10
 
 /* Right motor */
-#define DIRR 7
-#define PWMR 6
+#define DIRR 13
+#define PWMR 11

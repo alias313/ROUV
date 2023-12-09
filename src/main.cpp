@@ -3,7 +3,7 @@
 #include "main.hpp"
 #include "debug.hpp"
 
-void turnMotor(char motor, char inputLetter, int dutyCycle);
+void turnMotor(char motor, char turnDirection, int dutyCycle);
 int getMedianNum(int bArray[], int iFilterLen);
 void verboseMessages();
 
@@ -13,6 +13,12 @@ void setup()
     pinMode(MPXPin, INPUT);
     pinMode(TDSPin, INPUT);
     pinMode(TSWPin, INPUT);
+    pinMode(DIRL, LOW);
+    pinMode(PWML, LOW);
+    pinMode(DIRC, LOW);
+    pinMode(PWMC, LOW);
+    pinMode(DIRR, LOW);
+    pinMode(PWMR, LOW);
     while (debugAvailable() <= 0 || debugRead() != 's') 
     {
         debugln("Send 's' to start: ");
@@ -31,28 +37,37 @@ void loop()
     while (Serial.available() > 0)
     {
         char inputByte = Serial.read();
-        debugln(inputByte);
+        debug("Serial is available with byte '");
+        debug(inputByte);
+        debugln("' read");
         
         if (inputByte != '\n')
         {
             command[command_pos] = inputByte;
+            debug("Command_pos: ");
+            debugln(command_pos);
             command_pos++;
         } else {
-            command_pos = 0;
-            debugln("\n");
+            command[0] = 'c'; // First character indicates whether captain mode is on/off, 'c' = on
+            command_pos = 1;
+            debugln("newline");
+            debug("Characters in serial buffer left: ");
+            debugln(Serial.available());
             break;
         }
-
+        debug("Characters in serial buffer left: ");
+        debugln(Serial.available());
     }
 
-    if (Serial.available() > 0)
+    if (command[0] == 'c')
     {
-        commandKey = command[0];
-        turn = command[1];
+        commandKey = command[1];
+        turn = command[2];
         switch (commandKey)
         {
         case 'a':
-            turnMotor('l', turn, STOP);
+            digitalWrite(DIRL, LOW);
+            analogWrite(PWML, STOP);
             break;
         case 'q':
             turnMotor('l', turn, LOW_SPEED);
@@ -68,7 +83,8 @@ void loop()
             break;
 
         case 's':
-            turnMotor('c', turn, STOP);
+            digitalWrite(DIRC, LOW);
+            analogWrite(PWMC, STOP);
             break;
         case 'f':
             turnMotor('c', turn, LOW_SPEED);
@@ -84,7 +100,8 @@ void loop()
             break;
 
         case 'd':
-            turnMotor('r', turn, STOP);
+            digitalWrite(DIRR, LOW);
+            analogWrite(PWMR, STOP);
             break;
         case 'u':
             turnMotor('r', turn, LOW_SPEED);
@@ -101,15 +118,15 @@ void loop()
         case '\r':
             debugln("\r");
             break;
-        case '\n':
-            debugln("\n");
-            break;
+
         default:
-            debug("Command Key ");
+            debug("Command key '");
             debug(commandKey);
-            debugln(" not recognized.");
+            debugln("' not recognized.");
             break;
         }
+
+        command[0] = 'n'; // captain mode off
     }
     static unsigned long analogSampleTimepoint = millis();
     if (millis() - analogSampleTimepoint > sampleRate) // every 20 milliseconds, read the analog value from the ADC
@@ -175,38 +192,41 @@ void loop()
         Serial.print(" ");          // 1 byte
         Serial.print(ntuValue);     // 2 bytes
         Serial.print(" ");          // 1 byte
-        Serial.print("+234");    // 2 bytes
+        Serial.print("+234");       // 2 bytes
         Serial.print(" ");          // 1 byte
-        Serial.print("-1034");   // 2 bytes
+        Serial.print("-1034");      // 2 bytes
         Serial.print(" ");          // 1 byte
-        Serial.println("+0");    // 2 bytes
+        Serial.println("+0");       // 2 bytes
     }
 }
 
-void turnMotor(char motor, char inputLetter, int dutyCycle)
+void turnMotor(char motor, char turnDirection, int dutyCycle)
 {
     switch (motor)
     {
     case 'l':
-        if (inputLetter == CLOCKWISE_LETTER) digitalWrite(DIRL, CLOCKWISE);
-        else if (inputLetter == ANTICLOCKWISE_LETTER) digitalWrite(DIRL, ANTICLOCKWISE);
+        if (turnDirection == CLOCKWISE_LETTER) digitalWrite(DIRL, CLOCKWISE);
+        else if (turnDirection == ANTICLOCKWISE_LETTER) digitalWrite(DIRL, ANTICLOCKWISE);
         analogWrite(PWML, dutyCycle);
         break;
     case 'c':
-        if (inputLetter == CLOCKWISE_LETTER) digitalWrite(DIRC, CLOCKWISE);
-        else if (inputLetter == ANTICLOCKWISE_LETTER) digitalWrite(DIRC, ANTICLOCKWISE);
+        if (turnDirection == CLOCKWISE_LETTER) digitalWrite(DIRC, CLOCKWISE);
+        else if (turnDirection == ANTICLOCKWISE_LETTER) digitalWrite(DIRC, ANTICLOCKWISE);
         analogWrite(PWMC, dutyCycle);
         break;
     case 'r':
-        if (inputLetter == CLOCKWISE_LETTER) digitalWrite(DIRR, CLOCKWISE);
-        else if (inputLetter ==  ANTICLOCKWISE_LETTER) digitalWrite(DIRR, ANTICLOCKWISE);
+        if (turnDirection == CLOCKWISE_LETTER) digitalWrite(DIRR, CLOCKWISE);
+        else if (turnDirection ==  ANTICLOCKWISE_LETTER) digitalWrite(DIRR, ANTICLOCKWISE);
         analogWrite(PWMR, dutyCycle);
     default:
+        debug("Turn key '");
+        debug(turnDirection);
+        debugln("' not recognized.");
         break;
     }
     debug("Command ");
     debug(motor);
-    debug(inputLetter);
+    debug(turnDirection);
     debugln(dutyCycle);
 }
 

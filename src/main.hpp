@@ -8,16 +8,16 @@
 #define FULL_SPEED 250 // ceiling(98% of 255)
 
 #define CLOCKWISE_LETTER 'k'
-#define ANTICLOCKWISE_LETTER 'a'
+#define ANTICLOCKWISE_LETTER 'j'
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 0
 
-#define MAX_MESSAGE_LENGTH 4
+#define MAX_MESSAGE_LENGTH 5
 
 char commandKey;   // command to chose the motor & speed
 char turn;      // 'k' turns clockwise, 'a' turns anticlockwise
 static char command[MAX_MESSAGE_LENGTH];
-static unsigned int command_pos = 0;
+static unsigned int command_pos = 1;
 
 unsigned int sampleRate = 20U;
 unsigned int window = 25;   // Number of samples taken
