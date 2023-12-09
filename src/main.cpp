@@ -1,7 +1,23 @@
 #include <Arduino.h>
-#include "pins.hpp"
 #include "main.hpp"
 #include "debug.hpp"
+
+const uint8_t MPXPin = A0;   // MPX2100AP (pressure in kPa) sensor
+const uint8_t TDSPin = A1;   // TDS (Total Dissolved Solids in ppm) sensor
+const uint8_t TSWPin = A2;   // TSW-20M Turbidity (Nephelometer in NTU) sensor
+const uint8_t LMPin = A3;   // LM35 temperature sensor 
+
+/* Left motor */
+const uint8_t DIRL = 2;
+const uint8_t PWML = 3;
+
+/* Center motor */
+const uint8_t DIRC = 12;
+const uint8_t PWMC = 10;
+
+/* Right motor */
+const uint8_t DIRR = 13;
+const uint8_t PWMR = 11;
 
 void turnMotor(char motor, char turnDirection, int dutyCycle);
 int getMedianNum(int bArray[], int iFilterLen);
@@ -10,15 +26,18 @@ void verboseMessages();
 void setup()
 {
     Serial.begin(9600);
+
     pinMode(MPXPin, INPUT);
     pinMode(TDSPin, INPUT);
     pinMode(TSWPin, INPUT);
+
     pinMode(DIRL, LOW);
     pinMode(PWML, LOW);
     pinMode(DIRC, LOW);
     pinMode(PWMC, LOW);
     pinMode(DIRR, LOW);
     pinMode(PWMR, LOW);
+
     while (debugAvailable() <= 0 || debugRead() != 's') 
     {
         debugln("Send 's' to start: ");
