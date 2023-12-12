@@ -216,6 +216,7 @@ void loop()
         Serial.print("-1034");      // 2 bytes
         Serial.print(" ");          // 1 byte
         Serial.println("+0");       // 2 bytes
+        // Serial.println(tempValue);
     }
 }
 
