@@ -3,9 +3,9 @@
 #include "debug.hpp"
 
 const uint8_t MPXPin = A0;   // MPX2100AP (pressure in kPa) sensor
-const uint8_t TDSPin = A1;   // TDS (Total Dissolved Solids in ppm) sensor
+const uint8_t TDSPin = A3;   // TDS (Total Dissolved Solids in ppm) sensor
 const uint8_t TSWPin = A2;   // TSW-20M Turbidity (Nephelometer in NTU) sensor
-const uint8_t LMPin = A3;   // LM35 temperature sensor 
+const uint8_t LMPin = A1;   // LM35 temperature sensor 
 
 /* Left motor */
 const uint8_t DIRL = 2;
@@ -203,9 +203,9 @@ void loop()
 
         // Serial communication (frame sent to master)
         debug("\tData in array: ");
-        Serial.print(tempValue);    // 4 bytes
+        Serial.print(tempValue, 1);    // 4 bytes
         Serial.print(" ");          // 1 byte
-        Serial.print(depth);        // 4 bytes
+        Serial.print(depth, 1);        // 4 bytes
         Serial.print(" ");          // 1 byte
         Serial.print(tdsValue);     // 2 bytes
         Serial.print(" ");          // 1 byte

@@ -20,7 +20,7 @@ static char command[MAX_MESSAGE_LENGTH];
 static unsigned int command_pos = 1;
 
 unsigned int sampleRate = 20U;
-unsigned int window = 25;   // Number of samples taken
+unsigned int window = 10;   // Number of samples taken
 
 // LM35 (Temperature sensor)
 float lmVoltage = 0.0;
