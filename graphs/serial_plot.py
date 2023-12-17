@@ -27,7 +27,7 @@ for i in range(N):
 
 dataList = np.zeros(50, dtype=np.float64)
 
-ser = serial.Serial("/dev/ttyUSB0", 9600)
+ser = serial.Serial("COM9", 9600)
 
 def getfigax():
     fig, (axL, axR) = plt.subplots(ncols=2, tight_layout=True)
@@ -155,8 +155,8 @@ def animate(i, datalist, dataNTU, ser):
     arduinodata_string = ser.readline().decode('ascii') 
     try:
         arduinodata_array = [float(idx) for idx in arduinodata_string.split()]
-        datalist.append(int(arduinodata_array[1]))
-        dataNTU.append(int(arduinodata_array[2]))
+        datalist.append(int(arduinodata_array[0]))
+        dataNTU.append(int(arduinodata_array[0]))
     except:
         pass
 
@@ -184,7 +184,7 @@ fig = plt.figure()
 ax = fig.add_subplot(121)
 ay = fig.add_subplot(122)
 
-ser = serial.Serial("/dev/ttyUSB0", 9600)
+ser = serial.Serial("COM9", 9600)
 time.sleep(1)
 
 ani = animation.FuncAnimation(fig, animate, frames=100, fargs=(datalist, dataNTU, ser), interval=100)

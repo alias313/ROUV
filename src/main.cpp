@@ -38,11 +38,11 @@ void setup()
     pinMode(DIRR, LOW);
     pinMode(PWMR, LOW);
 
-    while (debugAvailable() <= 0 || debugRead() != 's') 
-    {
-        debugln("Send 's' to start: ");
-        debugDelay(200); 
-    }
+    // while (debugAvailable() <= 0 || debugRead() != 's') 
+    // {
+    //     debugln("Send 's' to start: ");
+    //     debugDelay(200); 
+    // }
     debugln("Lectura de: presion (manometro), turbidez (turbidimetro), tds (conductimetro) y velocidad");
     debugln("Conversion a medidas utiles: tension => profundidad, turbidez, total de solidos disueltos");
     debugln("=========================================================================================");
@@ -199,24 +199,17 @@ void loop()
         tswVoltage = 0.0;
 
         // Serial debugging
-        debugMessages();
+        // debugMessages();
 
         // Serial communication (frame sent to master)
-        debug("\tData in array: ");
+        // debug("\tData in array: ");
         Serial.print(tempValue, 1);    // 4 bytes
         Serial.print(" ");          // 1 byte
         Serial.print(depth, 1);        // 4 bytes
         Serial.print(" ");          // 1 byte
         Serial.print(tdsValue);     // 2 bytes
         Serial.print(" ");          // 1 byte
-        Serial.print(ntuValue);     // 2 bytes
-        Serial.print(" ");          // 1 byte
-        Serial.print("+234");       // 2 bytes
-        Serial.print(" ");          // 1 byte
-        Serial.print("-1034");      // 2 bytes
-        Serial.print(" ");          // 1 byte
-        Serial.println("+0");       // 2 bytes
-        // Serial.println(tempValue);
+        Serial.println(ntuValue);     // 2 bytes
     }
 }
 
